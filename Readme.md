@@ -17,7 +17,7 @@ Expexted output
 ```
 
 ## Ingest Microservice
-- /health -> {status: "OK"}
+- /health -> ```{status: "OK"}```
 - /driver -> {status: "OK"}
 - /conductor -> {status: "OK"}
 - /service -> {status: "OK"} 
