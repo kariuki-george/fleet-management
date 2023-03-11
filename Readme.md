@@ -2,10 +2,10 @@
 
 ## Installing 
 
-``` git clone https://github.com/smiley-geek/fleet-management.git
-    
-    docker-compose up -d
+``` 
+git clone https://github.com/smiley-geek/fleet-management.git
 
+docker-compose up -d
 ``` 
 
 ## Test
