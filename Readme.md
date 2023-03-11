@@ -5,6 +5,10 @@
 ``` 
 git clone https://github.com/smiley-geek/fleet-management.git
 
+create .env file in ingest-service folder
+
+add BROKER= kafka-fleet-management:9092 
+
 docker-compose up -d
 ``` 
 
