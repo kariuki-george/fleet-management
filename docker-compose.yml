@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  ingest-fleet-management: 
+    depends_on:
+      - kafka-fleet-management
+    build:
+      context: ./ingest-service
+      dockerfile: "./Dockerfile"
+    env_file:
+      - ./ingest-service/.env 
+    ports: 
+      - 5555:5555 
+    container_name: ingest-fleet-management
+    networks:
+        - fleet-management-network
+  
+  zookeeper-fleet-management:
+    image: confluentinc/cp-zookeeper:7.3.2
+    container_name: zookeeper-fleet-management
+    ports:
+      - "5557:2181"
+    networks:
+      - fleet-management-network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 5557
+      ZOOKEEPER_TICK_TIME: 2000
+    
+
+  kafka-fleet-management:
+    image: confluentinc/cp-kafka:7.3.2
+    container_name: kafka-fleet-management
+    ports:
+      - "5558:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-fleet-management:9092,PLAINTEXT_INTERNAL://kafka-fleet-management:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_ADVERTISED_HOST_NAME: kafka-fleet-management
+      KAFKA_ZOOKEEPER_CONNECT:  zookeeper-fleet-management:5557
+    networks:
+      - fleet-management-network
+      
+  apigateway-kafka-fleet-management:
+    image: nginx:alpine
+    container_name: apigateway-kafka-fleet-management
+    ports: 
+      - 5550:80
+    volumes:
+      -  ./api-gateway:/etc/nginx/conf.d
+    depends_on:
+      - ingest-fleet-management
+    networks:
+      - fleet-management-network
+
+
+networks:
+  fleet-management-network:
+    driver: bridge  
+    
