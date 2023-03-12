@@ -55,6 +55,17 @@ services:
       - ingest-fleet-management
     networks:
       - fleet-management-network
+  
+  superset:
+    container_name: superset2
+    build: 
+      context: ./superset-config
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8088    
+    networks:
+      - fleet-management-network
+
 
 
 networks:
