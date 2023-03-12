@@ -57,7 +57,7 @@ services:
       - fleet-management-network
   
   superset:
-    container_name: superset2
+    container_name: superset-fleetmanagement
     build: 
       context: ./superset-config
       dockerfile: ./Dockerfile
@@ -65,7 +65,17 @@ services:
       - 8080:8088    
     networks:
       - fleet-management-network
-
+  
+  db:
+    image: mysql:8.0
+    container_name: mysql-fleetmanagement
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sample
+    ports:
+     - 3306:3306
+    networks:
+      - fleet-management-network
 
 
 networks:
