@@ -44,15 +44,36 @@ services:
     networks:
       - fleet-management-network
       
-  apigateway-kafka-fleet-management:
+  apigateway-fleet-management:
     image: nginx:alpine
-    container_name: apigateway-kafka-fleet-management
+    container_name: apigateway-fleet-management
     ports: 
       - 5550:80
     volumes:
       -  ./api-gateway:/etc/nginx/conf.d
     depends_on:
       - ingest-fleet-management
+    networks:
+      - fleet-management-network
+  
+  superset-fleet-management:
+    container_name: superset-fleet-management
+    build: 
+      context: ./superset-config
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8088    
+    networks:
+      - fleet-management-network
+  
+  db-fleet-management:
+    image: mysql:8.0
+    container_name: mysql-fleet-management
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sample
+    ports:
+     - 3306:3306
     networks:
       - fleet-management-network
 
