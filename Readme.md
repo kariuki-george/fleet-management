@@ -12,6 +12,8 @@ add BROKER= kafka-fleet-management:9092
 docker-compose up -d
 ``` 
 
+
+
 ## Test
 
 Navigate to http://localhost:5550 - apigateway url 
@@ -40,3 +42,9 @@ Expexted output
 - Conductor Data goes to Conductor topic 
 
 - At the moment, the data is not validated by the ingest service so any data in json format is acceptable. 
+
+
+## Poweroff 
+```
+docker-compose down
+```
