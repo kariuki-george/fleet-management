@@ -53,14 +53,16 @@ services:
       -  ./api-gateway:/etc/nginx/conf.d
     depends_on:
       - ingest-fleet-management
+      - superset-fleet-management 
     networks:
       - fleet-management-network
   
   superset-fleet-management:
     container_name: superset-fleet-management
-    build: 
-      context: ./superset-config
-      dockerfile: ./Dockerfile
+    # build: 
+    #   context: ./superset-config
+    #   dockerfile: ./Dockerfile
+    image: iansawala/superset_conf
     ports:
       - 8080:8088    
     networks:
