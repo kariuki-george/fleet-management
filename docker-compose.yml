@@ -4,14 +4,13 @@ services:
   ingest-fleet-management: 
     depends_on:
       - kafka-fleet-management
-    build:
-      context: ./ingest-service
-      dockerfile: "./Dockerfile"
+    image: kariukigeorge/ingest-fleet-management
     env_file:
       - ./ingest-service/.env 
     ports: 
       - 5555:5555 
     container_name: ingest-fleet-management
+    restart: unless-stopped
     networks:
         - fleet-management-network
   
@@ -20,6 +19,7 @@ services:
     container_name: zookeeper-fleet-management
     ports:
       - "5557:2181"
+    restart: unless-stopped
     networks:
       - fleet-management-network
     environment:
@@ -41,6 +41,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_ADVERTISED_HOST_NAME: kafka-fleet-management
       KAFKA_ZOOKEEPER_CONNECT:  zookeeper-fleet-management:5557
+    restart: unless-stopped
     networks:
       - fleet-management-network
       
@@ -54,6 +55,7 @@ services:
     depends_on:
       - ingest-fleet-management
       - superset-fleet-management 
+    restart: unless-stopped
     networks:
       - fleet-management-network
   
@@ -65,6 +67,7 @@ services:
     image: iansawala/superset_conf
     ports:
       - 8080:8088    
+    restart: unless-stopped
     networks:
       - fleet-management-network
   
@@ -76,6 +79,7 @@ services:
       - MYSQL_DATABASE=sample
     ports:
       - 3306:3306
+    restart: unless-stopped
     networks:
       - fleet-management-network
 
