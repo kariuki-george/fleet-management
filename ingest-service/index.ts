@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import routes from "./routes";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import { Kafka, Producer } from "kafkajs";
 
 const app = express();
 dotenv.config();
@@ -21,7 +22,6 @@ declare global {
     }
   }
 }
-import { Kafka, Producer } from "kafkajs";
 
 const producerSetup = async () => {
   try {
@@ -48,7 +48,7 @@ app.use("*", async (req, _, next) => {
   next();
 });
 
-app.use("/", routes);
+app.use("/ingest", routes);
 
 app.listen(5555, () => {
   console.log("Ingest service is listening on port 5555");
