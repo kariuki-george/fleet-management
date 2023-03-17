@@ -43,6 +43,8 @@ Expexted output
 
 - At the moment, the data is not validated by the ingest service so any data in json format is acceptable. 
 
+## Nifi
+- Read the access-nifi.txt file in the nifi directory on how to access nifi.
 
 ## Poweroff 
 ```

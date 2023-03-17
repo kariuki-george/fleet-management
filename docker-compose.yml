@@ -82,7 +82,18 @@ services:
     restart: unless-stopped
     networks:
       - fleet-management-network
-
+  
+  nifi-fleet-management:
+    container_name: nifi-fleet-management
+    image: apache/nifi
+    ports:
+      - 8443:8443
+    networks:
+      - fleet-management-network
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=fleetmanagementpassword
+    restart: unless-stopped
 
 networks:
   fleet-management-network:
