@@ -1,10 +1,7 @@
 
 ## Nifi
-- Trying to access nifi from the docker desktop application will throw an error since the docker 
-compose application fowards you to http://localhost:8443/nifi.
-- Since nifi has been comfigured to only use the HTTPS security protocol, access nifi from the link below
-- https://localhost:8443/nifi
-- A fix will be provided later.
+- http://localhost:8091/nifi
+
 
 ##
 -Login details

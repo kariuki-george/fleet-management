@@ -87,12 +87,13 @@ services:
     container_name: nifi-fleet-management
     image: apache/nifi
     ports:
-      - 8443:8443
+      - 8091:8080
     networks:
       - fleet-management-network
     environment:
       - SINGLE_USER_CREDENTIALS_USERNAME=admin
       - SINGLE_USER_CREDENTIALS_PASSWORD=fleetmanagementpassword
+      - NIFI_WEB_HTTP_PORT=8080
     restart: unless-stopped
 
 networks:
