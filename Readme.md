@@ -14,7 +14,7 @@ docker-compose up -d
 
 ## Test
 
-Navigate to http://localhost:5550 - apigateway url
+Navigate to http://localhost:5550/ingest/health - apigateway url
 Expexted output
 
 ```
@@ -23,7 +23,7 @@ Expexted output
 
 ## Ingest Microservice
 
-- http://localhost:5550/{route}
+- http://localhost:5550/ingest/{route}
 
 - /health -> `{status: "OK"}`
 - /driver -> `{status: "OK"}`
