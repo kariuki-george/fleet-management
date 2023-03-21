@@ -5,7 +5,6 @@ const driverIngest = async (data: any, producer: Producer) => {
     topic: "Drivers",
     messages: [{ value: JSON.stringify(data), partition: 0 }],
   });
-  await producer.disconnect();
 };
 
 const serviceIngest = async (data: any, producer: Producer) => {
@@ -13,7 +12,6 @@ const serviceIngest = async (data: any, producer: Producer) => {
     topic: "Service",
     messages: [{ value: JSON.stringify(data), partition: 0 }],
   });
-  await producer.disconnect();
 };
 
 const conductorIngest = async (data: any, producer: Producer) => {
@@ -21,7 +19,6 @@ const conductorIngest = async (data: any, producer: Producer) => {
     topic: "Conductor",
     messages: [{ value: JSON.stringify(data), partition: 0 }],
   });
-  await producer.disconnect();
 };
 
-export { driverIngest,serviceIngest,conductorIngest };
+export { driverIngest, serviceIngest, conductorIngest };

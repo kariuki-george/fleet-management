@@ -48,7 +48,9 @@ app.use("*", async (req, _, next) => {
   next();
 });
 
-app.use("/ingest", routes);
+app.use("/ingest", routes, (req) => {
+  req.producer.disconnect();
+});
 
 app.listen(5555, () => {
   console.log("Ingest service is listening on port 5555");
