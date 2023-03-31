@@ -10,7 +10,7 @@ router.get("/health", (_, res) => {
 
 router.post("/driver", async (req, res) => {
   await driverIngest(req.body, req.producer);
-  return res.json({ status: "OK" });
+  return res.json(req.body);
 });
 
 router.post("/conductor", async (req, res) => {

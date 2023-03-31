@@ -1,6 +1,8 @@
 import { Producer } from "kafkajs";
 
 const driverIngest = async (data: any, producer: Producer) => {
+  console.log(data);
+
   await producer.send({
     topic: "Drivers",
     messages: [{ value: JSON.stringify(data), partition: 0 }],

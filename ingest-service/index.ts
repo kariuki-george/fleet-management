@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import routes from "./routes";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
@@ -10,6 +10,7 @@ app.use(bodyParser.json());
 
 // simple config setup
 const broker = process.env.BROKER;
+console.log(broker);
 if (!broker) {
   throw new Error("Kafka broker url not provided");
 }
