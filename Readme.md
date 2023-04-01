@@ -27,7 +27,7 @@ Expexted output
 
 - /health -> `{status: "OK"}`
 - /driver -> `{status: "OK"}`
-- /conductor -> `{status: "OK"}`
+- /complaint -> `{status: "OK"}`
 - /service -> `{status: "OK"}`
 - /gen/:time -> `{status: "OK"}` Generates random data for time seconds
 
@@ -40,7 +40,7 @@ Expexted output
 
 - Driver Data goes to Driver topic
 - Service Data goes to Service topic
-- Conductor Data goes to Conductor topic
+- complaint Data goes to complaints topic
 
 - At the moment, the data is not validated by the ingest service so any data in json format is acceptable.
 
