@@ -29,7 +29,7 @@ Expexted output
 - /driver -> `{status: "OK"}`
 - /complaint -> `{status: "OK"}`
 - /service -> `{status: "OK"}`
-- /gen/:time -> `{status: "OK"}` Generates random data for time seconds
+- /gen/:time -> `{status: "OK"}`
 
 ## Connecting to kafka
 
@@ -91,6 +91,26 @@ driver events: {
 complaints events: {
     carId: string
 }
+```
+
+## Db
+
+### Create Tables
+
+```
+CREATE TABLE Drivers(driverId varchar(100), carId varchar(100),routeId varchar(100), createdAt varchar(100), timeTaken varchar(10) );
+CREATE TABLE Complaints(carId varchar(100));
+CREATE TABLE Service(carId varchar(100), price varchar(100));
+
+```
+
+### Count number of items per table
+
+```
+ select count(*) from Drivers;
+ select count(*) from Service;
+ select count(*) from Complaints;
+
 ```
 
 ## Poweroff
