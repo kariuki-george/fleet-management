@@ -1,144 +1,147 @@
-import Chance from "chance";
 import fs from "fs";
 import { stringify } from "csv-stringify";
+import { routes, cars } from ".";
 
-enum DRIVINGSTATES {
-  DRIVING = "DRIVING",
-  ARRIVED = "ARRIVED",
-  NOTSTARTED = "NOTSTARTED",
-  PROBLEM = "PROBLEM",
-  RESTING = "RESTING",
+interface Trip {
+  driverId: string;
+  routeId: string;
+  timeTaken: number;
+  eventTime: Date;
+  carId: string;
 }
+
 interface State {
-  drivers: { name: string; uuid: string }[];
-  events: {
-    createdAt: Date;
-    driverUUID: string;
-    driverName: string;
-    status: DRIVINGSTATES;
-  }[];
-  restingState: {[driverId:string]: number};
-  drivingState: { [driverId: string]: { status: DRIVINGSTATES } };
+  driverState: { [driverId: string]: Trip };
+  tomorrowDate: Date;
 }
 
-const state: State = {
-  drivers: [],
-  drivingState: {},
-  events: [],
-  restingState: {},
+const state: State = { driverState: {}, tomorrowDate: new Date() };
+
+const trips: Trip[] = [];
+
+// Will generate an event
+
+const genDriverEvent = (driverId: string) => {
+  const { eventTime, routeId, carId } = state.driverState[driverId];
+  // Check if the driver will go another trip or will they rest
+  // Rest times range from 6 hours to 9 hours
+  // Work starts at 5. So stopping time will range from 8 to 11pm
+  const hour = new Date(eventTime).getHours();
+
+  const timeRandom = [
+    6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
+  ];
+
+  const randomRestTime =
+    timeRandom[Math.floor(Math.random() * timeRandom.length)];
+
+  // THe can falls under 24 hours system and the trip can roll to the next day
+  if (hour > 24 + 6 - randomRestTime || eventTime >= state.tomorrowDate) {
+    // Rest
+    delete state.driverState[driverId];
+    return;
+  }
+  // continue working
+  // Generate a random route that is different from the previous one
+
+  let randomRoute = routes[Math.floor(Math.random() * routes.length)].routeId;
+  while (randomRoute === routeId) {
+    randomRoute = routes[Math.floor(Math.random() * routes.length)].routeId;
+  }
+
+  // Generate a random time taken for the trip
+  const timeTaken = Number(
+    (Math.floor(Math.random() * (120 - 30 + 1) + 30) / 60).toPrecision(2)
+  );
+
+  state.driverState[driverId] = {
+    carId,
+    driverId,
+    routeId: randomRoute,
+    timeTaken,
+    eventTime: new Date(
+      new Date(eventTime).getTime() + timeTaken * 60 * 60 * 1000
+    ),
+  };
+
+  trips.push({
+    driverId,
+    routeId: randomRoute,
+    timeTaken,
+    eventTime: new Date(
+      new Date(eventTime).getTime() + timeTaken * 60 * 60 * 1000
+    ),
+    carId,
+  });
+  return;
 };
 
-const chance = new Chance();
-// Create drivers
-(() => {
-  for (let count = 0; count < 10; count++) {
-    state.drivers.push({ name: chance.name(), uuid: chance.guid() });
+// Will generate events for a day
+
+const generateDayEvents = (date: Date) => {
+  // Start the day with preparing the state.driverState
+  for (let index = 0; index < cars.length; index++) {
+    state.driverState[cars[index].driverId] = {
+      driverId: cars[index].driverId,
+      eventTime: date,
+      routeId: "",
+      timeTaken: 0,
+      carId: cars[index].carId,
+    };
   }
-})();
-// Create Driver events
-(() => {
-  // Create NOTSTARTED states for each driver
-  for (const index in state.drivers) {
-    let driver = state.drivers[index];
-    state.drivingState[driver.uuid] = { status: DRIVINGSTATES.NOTSTARTED };
-    state.events.push({
-      createdAt: new Date(),
-      driverName: driver.name,
-      driverUUID: driver.uuid,
-      status: state.drivingState[driver.uuid].status,
-    });
-  }
-})();
-(() => {
-  // Simulation
-  let round = 0;
-  while (round < 1000) {
-    for (const index in state.drivers) {
-      let driver = state.drivers[index];
-      switch (state.drivingState[driver.uuid].status) {
-        case DRIVINGSTATES.NOTSTARTED:
-          state.drivingState[driver.uuid].status = DRIVINGSTATES.DRIVING;
-          state.events.push({
-            createdAt: new Date(),
-            driverName: driver.name,
-            driverUUID: driver.uuid,
-            status: state.drivingState[driver.uuid].status,
-          });
-          break;
-        case DRIVINGSTATES.DRIVING:
-          const random = Math.random();
-          state.drivingState[driver.uuid].status =
-            random > 0.2 ? DRIVINGSTATES.ARRIVED : DRIVINGSTATES.PROBLEM;
-          state.events.push({
-            createdAt: new Date(),
-            driverName: driver.name,
-            driverUUID: driver.uuid,
-            status: state.drivingState[driver.uuid].status,
-          });
-          break;
-        case DRIVINGSTATES.ARRIVED:
-          // This is rest time
-          state.drivingState[driver.uuid].status = DRIVINGSTATES.RESTING;
-          state.restingState[driver.uuid] = Date.now();
-          break;
-        case DRIVINGSTATES.RESTING:
-          // Determine resting time
-          // Based on hours
-          // Rest averages from 2 to 24 hours
-          // Define the range of rest times
-          const T = [
-            2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 10, 11, 12, 13, 14,
-            15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-          ];
-          // Define the probabilities for each rest time
-          const probabilities = [
-            0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1,
-            0.05, 0.05, 0.05, 0.03, 0.02, 0.02, 0.02, 0.02, 0.02, 0.01, 0.01,
-            0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01,
-          ];
-          // Simulate a real-life scenario by selecting a random rest time based on the defined probabilities
-          const randomRestTime =
-            T.find(
-              (_, i, __) =>
-                Math.random() <
-                probabilities.slice(0, i + 1).reduce((a, b) => a + b)
-            ) || 0;
-          state.drivingState[driver.uuid].status = DRIVINGSTATES.NOTSTARTED;
-          state.events.push({
-            createdAt: new Date(Date.now() + randomRestTime * 60 * 60 * 1000),
-            driverName: driver.name,
-            driverUUID: driver.uuid,
-            status: state.drivingState[driver.uuid].status,
-          });
-          break;
-        case DRIVINGSTATES.PROBLEM:
-          state.drivingState[driver.uuid].status = DRIVINGSTATES.NOTSTARTED;
-          state.events.push({
-            createdAt: new Date(),
-            driverName: driver.name,
-            driverUUID: driver.uuid,
-            status: state.drivingState[driver.uuid].status,
-          });
-          break;
-        default:
-          console.log("HI");
-      }
+
+  // Run until the drivers have to rest
+  while (Object.keys(state.driverState).length > 0) {
+    const workingDrivers = Object.keys(state.driverState);
+    for (const driver in workingDrivers) {
+      genDriverEvent(workingDrivers[driver]);
     }
-    round++;
   }
-})();
+};
+
+// Generate events for each driver for a specified amount of time
+
+const genPeriodEvents = () => {
+  let startDate = new Date("2020-01-01T06:00:00.000Z");
+  let numOfDays = 90;
+
+  for (let counter = 0; counter < numOfDays; counter++) {
+    // Build the date
+    const calcDate = new Date(
+      startDate.getTime() + 1000 * 60 * 60 * 24 * numOfDays
+    );
+    // remove the 6am  mark
+    const tomorrowDate = new Date(
+      startDate.getTime() +
+        1000 * 60 * 60 * 24 * (numOfDays + 1) -
+        6 * 60 * 1000 * 60
+    );
+
+    state.tomorrowDate = tomorrowDate;
+
+    generateDayEvents(counter === 0 ? startDate : calcDate);
+  }
+};
+
+genPeriodEvents();
+
 // Write into the csv file
+
 (() => {
   const writableStream = fs.createWriteStream("csvs/drivers.csv");
-  const columns = ["createdAt", "status", "driverName", "driverUUID"];
-  const stringifier = stringify({
-    header: true,
-    columns: columns,
-  });
-  for (const index in state.events) {
-    const { createdAt, status, driverName, driverUUID } = state.events[index];
-   
-    stringifier.write([new Date(createdAt).toISOString(), status, driverName, driverUUID]);
+
+  const columns = ["driverId", "routeId", "carId", "timeTaken", "createdAt"];
+  const stringifier = stringify({ header: true, columns: columns });
+  for (const index in trips) {
+    const { driverId, eventTime, routeId, timeTaken, carId } = trips[index];
+    stringifier.write([
+      driverId,
+      routeId,
+      carId,
+      timeTaken,
+      new Date(eventTime),
+    ]);
   }
   stringifier.pipe(writableStream);
 })();

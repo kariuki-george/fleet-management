@@ -3,28 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chance_1 = __importDefault(require("chance"));
 const fs_1 = __importDefault(require("fs"));
 const csv_stringify_1 = require("csv-stringify");
-const state = {
-    cars: [],
-    events: [],
-};
-const chance = new chance_1.default();
-// Create cars
-(() => {
-    for (let count = 0; count < 10; count++) {
-        state.cars.push(chance.guid());
-    }
-})();
+const _1 = require(".");
+const events = [];
 // Create events
 (() => {
     // chance.
     // A round represents a day
-    const totalCars = state.cars.length;
+    const totalCars = _1.cars.length;
     for (let round = 0; round < 100; round++) {
         const random = Math.floor(Math.random() * totalCars);
-        state.events.push(state.cars[random]);
+        events.push(_1.cars[random].carId);
     }
 })();
 // Write into the csv file
@@ -32,8 +22,8 @@ const chance = new chance_1.default();
     const writableStream = fs_1.default.createWriteStream("csvs/complaints.csv");
     const columns = ["carId"];
     const stringifier = (0, csv_stringify_1.stringify)({ header: true, columns: columns });
-    for (const index in state.events) {
-        stringifier.write([state.events[index]]);
+    for (const index in events) {
+        stringifier.write([events[index]]);
     }
     stringifier.pipe(writableStream);
 })();

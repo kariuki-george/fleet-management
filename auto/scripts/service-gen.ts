@@ -1,37 +1,27 @@
-import Chance from "chance";
 import fs from "fs";
 import { stringify } from "csv-stringify";
+import { cars } from ".";
+import Chance from "chance";
 
-interface State {
-  cars: string[];
-  events: { carId: string; price: string }[];
+interface Events {
+  carId: string;
+  price: string;
 }
-
-const state: State = {
-  cars: [],
-  events: [],
-};
+const events: Events[] = [];
 const chance = new Chance();
-
-// Create cars
-(() => {
-  for (let count = 0; count < 10; count++) {
-    state.cars.push(chance.guid());
-  }
-})();
 
 // Create events
 (() => {
   // chance.
 
   // A round represents a day
-  const totalCars = state.cars.length;
+  const totalCars = cars.length;
 
   for (let round = 0; round < 100; round++) {
     const random = Math.floor(Math.random() * totalCars);
 
-    state.events.push({
-      carId: state.cars[random],
+    events.push({
+      carId: cars[random].carId,
       price: chance.dollar({ max: 50000, min: 500 }).slice(1),
     });
   }
@@ -43,8 +33,8 @@ const chance = new Chance();
   const writableStream = fs.createWriteStream("csvs/service.csv");
   const columns = ["carId", "amount"];
   const stringifier = stringify({ header: true, columns: columns });
-  for (const index in state.events) {
-    const { carId, price } = state.events[index];
+  for (const index in events) {
+    const { carId, price } = events[index];
     stringifier.write([carId, price]);
   }
   stringifier.pipe(writableStream);
