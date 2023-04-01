@@ -48,6 +48,51 @@ Expexted output
 
 - Read the access-nifi.txt file in the nifi directory on how to access nifi.
 
+## Auto
+
+- Creates random events and saves them to a csv files
+- Data types:
+
+```
+car: {
+    driverId: string;
+    driverName: string;
+    carId: string;
+}
+```
+
+```
+routes: {
+    routeId: string;
+    amount: string;
+    start: string;
+    dest: string;
+}
+```
+
+```
+service events: {
+    carId: string;
+    price: string
+}
+```
+
+```
+driver events: {
+    driverId: string;
+    eventTime: string;
+    routeId: string
+    timeTaken: string
+    carId: string
+}
+```
+
+```
+complaints events: {
+    carId: string
+}
+```
+
 ## Poweroff
 
 ```
