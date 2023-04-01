@@ -1,5 +1,5 @@
 import express from "express";
-import { conductorIngest, driverIngest, serviceIngest } from "../service";
+import { complaintsIngest, driverIngest, serviceIngest } from "../service";
 import Chance from "chance";
 
 const router = express.Router();
@@ -9,17 +9,17 @@ router.get("/health", (_, res) => {
 });
 
 router.post("/driver", async (req, res) => {
-  await driverIngest(req.body, req.producer);
+  await driverIngest(!!req.body[0] ? req.body[0] : req.body, req.producer);
   return res.json(req.body);
 });
 
-router.post("/conductor", async (req, res) => {
-  await conductorIngest(req.body, req.producer);
+router.post("/complaint", async (req, res) => {
+  await complaintsIngest(!!req.body[0] ? req.body[0] : req.body, req.producer);
   return res.json({ status: "OK" });
 });
 
 router.post("/service", async (req, res) => {
-  await serviceIngest(req.body, req.producer);
+  await serviceIngest(!!req.body[0] ? req.body[0] : req.body, req.producer);
   return res.json({ status: "OK" });
 });
 
