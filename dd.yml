@@ -1,0 +1,157 @@
+version: "3"
+
+services:
+  ingest-fleet-management:
+    # depends_on:
+    # - kafka-fleet-management
+    image: kariukigeorge/ingest-fleet-management
+    environment:
+      BROKER: redpanda:9092
+    ports:
+      - 5555:5555
+    container_name: ingest-fleet-management
+    restart: unless-stopped
+    networks:
+      - fleet-management-network
+      - kafka
+      - traefik
+      - redpanda
+
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ingest.rule=Host(`ingest.p.kariukigeorge.me`)
+      - traefik.http.routers.ingest.tls=true
+      - traefik.http.routers.ingest.tls.certresolver=lets-encrypt
+      - traefik.port=5555
+      # url: mysql://udnp866rj5ea1q3zn5tl:pscale_pw_czEijRqosb1i22P1nkiYAZPYaAEi9R3uSznrkTbkuuT@eu-central.connect.psdb.cloud/fleet-management?ssl={"rejectUnauthorized":true}
+
+  # zookeeper-fleet-management:
+  #   image: confluentinc/cp-zookeeper:7.3.2
+  #   container_name: zookeeper-fleet-management
+  #   ports:
+  #     - "5557:2181"
+  #   restart: unless-stopped
+  #   networks:
+  #     - fleet-management-network
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 5557
+  #     ZOOKEEPER_TICK_TIME: 2000
+
+  # kafka-fleet-management:
+  #   image: confluentinc/cp-kafka:7.3.2
+  #   container_name: kafka-fleet-management
+  #   ports:
+  #     - "5558:9092"
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-fleet-management:9092,PLAINTEXT_INTERNAL://kafka-fleet-management:29092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_ADVERTISED_HOST_NAME: kafka-fleet-management
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper-fleet-management:5557
+  #   restart: unless-stopped
+  #   networks:
+  #     - fleet-management-network
+
+  apigateway-fleet-management:
+    image: nginx:alpine
+    container_name: apigateway-fleet-management
+    ports:
+      - 5550:80
+    volumes:
+      - ./api-gateway:/etc/nginx/conf.d
+    depends_on:
+      - ingest-fleet-management
+      - superset-fleet-management
+      - nifi-fleet-management
+
+    restart: unless-stopped
+    networks:
+      - fleet-management-network
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.fleet-management-api.rule=Host(`fleet-management-api.p.kariukigeorge.me`)
+      - traefik.http.routers.fleet-management-api.tls=true
+      - traefik.http.routers.fleet-management-api.tls.certresolver=lets-encrypt
+      - traefik.port=80
+
+  superset-fleet-management:
+    container_name: superset-fleet-management
+    image: alvarogg777/superset
+    restart: unless-stopped
+    networks:
+      - fleet-management-network
+
+  # superset-fleet-management:
+  #   container_name: superset-fleet-management
+  #   # build:
+  #   #   context: ./superset-config
+  #   #   dockerfile: ./Dockerfile
+  #   image: iansawala/superset_conf
+  #   ports:
+  #     - 8080:8088
+  #   restart: unless-stopped
+  #   networks:
+  #     - fleet-management-network
+
+  db-fleet-management:
+    image: mysql:8.0
+    container_name: db-fleet-management
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sample
+    ports:
+      - 5450:3306
+    restart: unless-stopped
+    networks:
+      - fleet-management-network
+
+  nifi-fleet-management:
+    container_name: nifi-fleet-management
+    image: apache/nifi
+    depends_on:
+      - db-fleet-management
+    ports:
+      - 8091:8080
+    networks:
+      - fleet-management-network
+      - kafka
+      - redpanda
+
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=fleetmanagementpassword
+      - NIFI_WEB_HTTP_PORT=8080
+    restart: unless-stopped
+    volumes:
+      - ./nifi:/opt/nifi/nifi-current/drivers
+      - nifi_database_repository:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_conf:/opt/nifi/nifi-current/conf
+
+networks:
+  fleet-management-network:
+    driver: bridge
+  kafka:
+    external: true
+  traefik:
+    external: true
+  redpanda:
+    external: true
+
+volumes:
+  nifi_content_repository:
+  nifi_database_repository:
+  nifi_flowfile_repository:
+  nifi_provenance_repository:
+  nifi_logs:
+  nifi_state:
+  nifi_conf:
+# DATABASE_URL='mysql://695s91k10ac3dhuwjrkq:pscale_pw_J4KbPoZD0WNVBrkXx6dub1jOmb9X30sUYLirH9yzCEn@eu-central.connect.psdb.cloud/fleet-management?ssl={"rejectUnauthorized":true}'
+
+#mysql://root:Hn6oDIGTnVxEYf0xYLuU@containers-us-west-24.railway.app:7503/railway
