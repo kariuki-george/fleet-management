@@ -103,8 +103,8 @@ const generateDayEvents = (date: Date) => {
 // Generate events for each driver for a specified amount of time
 
 const genPeriodEvents = () => {
-  let startDate = new Date("2020-01-01T06:00:00.000Z");
-  let numOfDays = 90;
+  let startDate = new Date("2020-04-15T06:00:00.000Z");
+  let numOfDays = 7;
 
   for (let counter = 0; counter < numOfDays; counter++) {
     // Build the date
@@ -129,7 +129,7 @@ genPeriodEvents();
 // Write into the csv file
 
 (() => {
-  const writableStream = fs.createWriteStream("csvs/drivers.csv");
+  const writableStream = fs.createWriteStream("csvs/april-week-2-drivers.csv");
 
   const columns = ["driverId", "routeId", "carId", "timeTaken", "createdAt"];
   const stringifier = stringify({ header: true, columns: columns });

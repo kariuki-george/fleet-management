@@ -12,14 +12,14 @@ const events = [];
     // chance.
     // A round represents a day
     const totalCars = _1.cars.length;
-    for (let round = 0; round < 100; round++) {
+    for (let round = 0; round < 7 * 3; round++) {
         const random = Math.floor(Math.random() * totalCars);
         events.push(_1.cars[random].carId);
     }
 })();
 // Write into the csv file
 (() => {
-    const writableStream = fs_1.default.createWriteStream("csvs/complaints.csv");
+    const writableStream = fs_1.default.createWriteStream("csvs/april-week-2-complaints.csv");
     const columns = ["carId"];
     const stringifier = (0, csv_stringify_1.stringify)({ header: true, columns: columns });
     for (const index in events) {
